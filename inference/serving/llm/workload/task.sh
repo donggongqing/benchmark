@@ -7,7 +7,7 @@ CONCURRENT="$5"
 
 test -n "$MODEL_NAME"
 export OPENAI_API_KEY=openai
-export OPENAI_API_BASE="http://0.0.0.0:4000/v1"
+export OPENAI_API_BASE="http://0.0.0.0:8000/v1"
 export HF_ENDPOINT=https://hf-mirror.com
 
 python llmperf/token_benchmark_ray.py \
