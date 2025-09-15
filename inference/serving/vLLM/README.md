@@ -25,7 +25,7 @@ vllm serve --help 查看全部参数使用方法
 
 ## 2、性能测试
 提供两个测试脚本，选择适合自己任务的测试脚本即可
-vllm_perf_test.sh （无需额外依赖）\n
+vllm_perf_test.sh （无需额外依赖）<br>
 vllm_perf_test.py（支持config.json传入测试case，支持自定义输出路径。）
 
 
