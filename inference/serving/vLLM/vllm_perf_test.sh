@@ -30,7 +30,12 @@ FULL_OUTPUT_PATH="$BASE_DIR/$OUTPUT_FILE"
 echo "" > "$FULL_OUTPUT_PATH"  # Clear file if exists
 
 # CSV header (with P95 fields included)
-HEADER="input_len,output_len,max_concurrency,num_prompts,Successful_requests,Benchmark_duration_s,Total_input_tokens,Total_generated_tokens,Request_throughput_req_s,Output_token_throughput_tok_s,Total_Token_throughput_tok_s,Mean_TTFT_ms,Median_TTFT_ms,P95_TTFT_ms,P99_TTFT_ms,Mean_TPOT_ms,Median_TPOT_ms,P95_TPOT_ms,P99_TPOT_ms,Mean_ITL_ms,Median_ITL_ms,P95_ITL_ms,P99_ITL_ms,Mean_E2EL_ms,Median_E2EL_ms,P95_E2EL_ms,P99_E2EL_ms"
+HEADER="input_len,output_len,max_concurrency,num_prompts,Successful_requests,"\
+"Benchmark_duration_s,Total_input_tokens,Total_generated_tokens,Request_throughput_req_s,"\
+"Output_token_throughput_tok_s,Total_Token_throughput_tok_s,Mean_TTFT_ms,Median_TTFT_ms,"\
+"P95_TTFT_ms,P99_TTFT_ms,Mean_TPOT_ms,Median_TPOT_ms,P95_TPOT_ms,P99_TPOT_ms,"\
+"Mean_ITL_ms,Median_ITL_ms,P95_ITL_ms,P99_ITL_ms,Mean_E2EL_ms,Median_E2EL_ms,"\
+"P95_E2EL_ms,P99_E2EL_ms"
 echo "$HEADER" >> "$FULL_OUTPUT_PATH"
 
 echo "📊 Benchmark started for model: $MODEL_NAME"

@@ -11,7 +11,6 @@ vllm serve /path/to/model \
     --tensor-parallel-size 1 \
     --gpu-memory-utilization 0.95 \
     --dtype bfloat16 \
-    --served-model-name my_model
 ```
 
 ### 关键参数解析
@@ -25,8 +24,10 @@ vllm serve /path/to/model \
 vllm serve --help 查看全部参数使用方法
 
 ## 2、性能测试
+有三个测试脚本，选择适合自己任务的测试脚本即可
 
-### vllm_benchmark测试脚本（建议新开一个包含vllm的终端）
+### vllm_benchmark.sh测试脚本
+该脚本与llm中的脚本对齐
 step1：
 
 ```
@@ -49,7 +50,7 @@ step2：
 ```bash:
 bash vllm_benchmark.sh 
 ```
-### vllm_perf_test测试脚本（建议新开一个包含vllm的终端）
+### vllm_perf_test.sh测试脚本
 step1：
 
 ```
@@ -76,6 +77,29 @@ CONCURRENCY_AND_PROMPTS=(
 step2：
 ```bash:
 bash vllm_perf_test.sh
+```
+
+### vllm_perf_test.py测试脚本
+与上方脚本功能一致，新增支持config.json传入测试case，支持自定义输出路径。
+
+
+```
+python vllm_perf_test.py --config <config.json> --output_dir </data/...>
+```
+config.json参数说明：
+model_path：模型路径
+perf_test_cases：测试case，每个case是一个列表，列表元素是一个4个元素的列表，分别是[输入长度，输出长度，并发数，发送请求数量]
+```
+[
+  {
+    "model_path": "/data/model/deepseek-r1-distill-llama-70b/",
+    "perf_test_cases": [
+      [16, 16, 1, 4],
+      [32, 32, 2, 4],
+      [64, 64, 4, 8]
+    ]
+  }
+]
 ```
 
 

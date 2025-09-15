@@ -1,0 +1,10 @@
+[
+  {
+    "model_path": "/data/model/deepseek-r1-distill-llama-70b/",
+    "perf_test_cases": [
+      [16, 16, 1, 4],
+      [32, 32, 2, 4],
+      [64, 64, 4, 8]
+    ]
+  }
+]
