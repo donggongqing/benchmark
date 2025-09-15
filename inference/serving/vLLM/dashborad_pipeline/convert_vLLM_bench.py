@@ -159,7 +159,8 @@ def main():
     for _, row in df.iterrows():
         # Add empty line filtering in the main() function
         if pd.notna(row['max_concurrency']) and pd.notna(row['Successful_requests']):
-            out_rows.append(transform_row(row, args, src_name=os.path.basename(args.input)))
+            out_rows.append(transform_row(row, args))
+            # out_rows.append(transform_row(row, args, src_name=os.path.basename(args.input)))
 
     out_df = pd.DataFrame(out_rows, columns=TARGET_COLS)
 
