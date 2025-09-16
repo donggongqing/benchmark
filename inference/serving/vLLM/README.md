@@ -23,17 +23,52 @@ vllm serve /path/to/model \
 
 vllm serve --help 查看全部参数使用方法
 
-## 2、性能测试
+# 2、性能测试
 提供两个测试脚本，选择适合自己任务的测试脚本即可<br>
-vllm_perf_test.sh （无需额外依赖）<br>
-vllm_perf_test.py（支持config.json传入测试case，支持自定义输出路径。）
+vllm_perf.py（支持config.json传入测试case，支持自定义输出路径。）<br>
+vllm_perf.sh （无需额外依赖）<br>
 
+## vllm_perf.py测试脚本
+1️⃣支持config.json传入测试case，支持自定义输出路径。
 
-### vllm_perf_test.sh测试脚本
+```
+python vllm_perf.py --config <config.json> --output_dir </data/...>
+```
+config.json参数说明：
+model_path：模型路径
+perf_test_cases：测试case，每个case是一个列表，列表元素是一个4个元素的列表，分别是[输入长度，输出长度，并发数，发送请求数量]
+```
+[
+  {
+    "model_path": "/data/model/deepseek-r1-distill-llama-70b/",
+    "perf_test_cases": [
+      [1024, 1024, 1, 4],
+      [1024, 1024, 2, 4],
+      [1024, 1024, 4, 8],
+      [1024, 1024, 8, 16],
+      [1024, 1024, 16, 32],
+      [1024, 1024, 32, 64],
+      [1024, 1024, 64, 128],
+      [2048, 2048, 128, 256]
+    ]
+  }
+]
+```
+2️⃣同时该脚本支持直接修改代码中Default Configuration 的部分，使用这种方式时不能传入--config参数
+```
+DEFAULT_MODEL_PATH = 模型路径
+IO_PAIRS = 输入输出对
+DEFAULT_TEST_CASES = 并发数个请求数
+```
+```
+python vllm_perf.py  
+```
+
+## vllm_perf.sh测试脚本
 step1：
 
 ```
-修改vllm_perf_test.sh配置
+修改vllm_perf.sh配置
 
 #修改模型路径(被测模型的路径)
 MODEL_PATH="/data/models/deepseek-ai/deepseek-r1-distill-qwen-1.5b"
@@ -55,30 +90,7 @@ CONCURRENCY_AND_PROMPTS=(
 ```
 step2：
 ```bash:
-bash vllm_perf_test.sh
-```
-
-### vllm_perf_test.py测试脚本
-与上方脚本功能一致，新增支持config.json传入测试case，支持自定义输出路径。
-
-
-```
-python vllm_perf_test.py --config <config.json> --output_dir </data/...>
-```
-config.json参数说明：
-model_path：模型路径
-perf_test_cases：测试case，每个case是一个列表，列表元素是一个4个元素的列表，分别是[输入长度，输出长度，并发数，发送请求数量]
-```
-[
-  {
-    "model_path": "/data/model/deepseek-r1-distill-llama-70b/",
-    "perf_test_cases": [
-      [16, 16, 1, 4],
-      [32, 32, 2, 4],
-      [64, 64, 4, 8]
-    ]
-  }
-]
+bash vllm_perf.sh
 ```
 ps：使用dashboard_pipeline的测试脚本参考([查看步骤](./dashborad_pipeline/README.md))
 
