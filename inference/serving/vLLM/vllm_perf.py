@@ -108,67 +108,6 @@ def run_benchmark(model_path, model_name, input_len, output_len, max_concurrency
             ) from e2
 
 
-def extract_and_save1(output: str, input_len: int, output_len: int,
-                     max_concurrency: int, num_prompts: int, writer: csv.writer):
-    """
-    从 vllm 输出中提取指标并写入 CSV
-    """
-    data = {}
-
-    # 定义要抓取的指标名和正则模式
-    metrics = [
-        "Successful requests", "Benchmark duration", "Total input tokens",
-        "Total generated tokens", "Request throughput", "Output token throughput",
-        "Total Token throughput", "Mean TTFT", "Median TTFT", "P95 TTFT", "P99 TTFT",
-        "Mean TPOT", "Median TPOT", "P95 TPOT", "P99 TPOT",
-        "Mean ITL", "Median ITL", "P95 ITL", "P99 ITL",
-        "Mean E2EL", "Median E2EL", "P95 E2EL", "P99 E2EL"
-    ]
-
-    for line in output.splitlines():
-        line = line.strip()
-        for metric in metrics:
-            if line.startswith(metric):
-                # 匹配数字，忽略单位
-                m = re.search(r"[-+]?\d*\.\d+|\d+", line)
-                if m:
-                    data[metric] = m.group()
-                break  # 每行只匹配一次
-
-    # 生成 CSV 行
-    csv_row = [
-        input_len, output_len, max_concurrency, num_prompts,
-        data.get("Successful requests", ""),
-        data.get("Benchmark duration", ""),
-        data.get("Total input tokens", ""),
-        data.get("Total generated tokens", ""),
-        data.get("Request throughput", ""),
-        data.get("Output token throughput", ""),
-        data.get("Total Token throughput", ""),
-        data.get("Mean TTFT", ""),
-        data.get("Median TTFT", ""),
-        data.get("P95 TTFT", ""),
-        data.get("P99 TTFT", ""),
-        data.get("Mean TPOT", ""),
-        data.get("Median TPOT", ""),
-        data.get("P95 TPOT", ""),
-        data.get("P99 TPOT", ""),
-        data.get("Mean ITL", ""),
-        data.get("Median ITL", ""),
-        data.get("P95 ITL", ""),
-        data.get("P99 ITL", ""),
-        data.get("Mean E2EL", ""),
-        data.get("Median E2EL", ""),
-        data.get("P95 E2EL", ""),
-        data.get("P99 E2EL", "")
-    ]
-
-    writer.writerow(csv_row)
-    print(f"✅ Completed: input_len={input_len}, output_len={output_len}, "
-          f"max_concurrency={max_concurrency}, num_prompts={num_prompts}, "
-          f"Mean_E2EL_ms={data.get('Mean E2EL', '')}\n")
-
-
 def extract_and_save(output: str, input_len: int, output_len: int,
                      max_concurrency: int, num_prompts: int, writer: csv.writer):
     """
