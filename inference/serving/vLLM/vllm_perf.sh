@@ -5,20 +5,25 @@ MODEL_PATH="/data/model/deepseek-r1-distill-llama-70b/"
 
 # Input/output length pairs
 IO_PAIRS=(
-    "16 16"
-    "32 32"
+    "4096 1024"
 )
 
 # Concurrency and num-prompts (1-to-1 mapping)
 CONCURRENCY_AND_PROMPTS=(
-    "1 4"
+    "1 2"
     "2 4"
+    "4 8"
+    "8 16"
+    "16 32"
+    "32 64"
+    "64 128"
+    "128 256"
 )
 
 DATASET_NAME="random"
-
+DATA_TIME=$(date +%Y%m%d_%H%M%S)
 MODEL_NAME=$(basename "${MODEL_PATH%/}" | tr '[:upper:]' '[:lower:]')
-OUTPUT_FILE="vllm_bench_${MODEL_NAME}_results.csv"
+OUTPUT_FILE="vllm_bench_${MODEL_NAME}_${DATA_TIME}_results.csv"
 BASE_DIR="output_result"
 RESULT_DIR="vllm_results"
 
