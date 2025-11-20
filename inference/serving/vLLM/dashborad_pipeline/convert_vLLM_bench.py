@@ -89,15 +89,15 @@ def transform_row(row, args):
     out["servingVersion"] = args.serving_version or ""
 
     # timestamp: Prioritize using the values specified in args, otherwise use the current time or source file name
-    out["timestamp"] = args.timestamp or datetime.now(datetime.timezone.utc).isoformat()
+    out["timestamp"] = args.timestamp or datetime.now(timezone.utc).isoformat()
     out["source"] = args.source
     return out
 
 def parse_args():
     parser = argparse.ArgumentParser(description='convert bench result')
     
-    parser.add_argument('--model', required=True, help='Model name (e.g., deepseek-r1)')
     parser.add_argument('--model-alias', required=True, help='Uppercase model alias')
+    parser.add_argument('--input', required=True, help='Path to input CSV file (e.g., output_result/vllm_bench_deepseek-r1_20251119_103402_results.csv)')
     parser.add_argument('--tp', required=True, help='Tensor parallelism (default: 1)', default=1)
     parser.add_argument('--dp', help='Data parallelism (default: 1)', default='')
     parser.add_argument('--pp', help='Pipeline parallelism (default: 1)', default='')
@@ -118,7 +118,6 @@ def parse_args():
         default=datetime.now(timezone.utc).isoformat(),
         help='Timestamp in ISO format')
     # Future feature expansion
-    parser.add_argument('--input', help='output_result/vllm_bench_<model>_results.csv')
     parser.add_argument('--output', help='convert_output/vllm_bench_<model>_converted.csv')
 
     return parser.parse_args()
@@ -127,15 +126,17 @@ def parse_args():
 def main():
     args = parse_args()
     
-    # Automatically generate the input path
+    # Input is required and should be the CSV path
     if not args.input:
-        args.input = os.path.join('output_result', f'vllm_bench_{args.model}_results.csv')
-    
-    # Automatically create the output directory and generate the path
+        print("Error: --input is required and must point to a vllm bench CSV file.")
+        return
+
+    # Automatically create the output directory and generate the path if not provided
     if not args.output:
         output_dir = 'convert_output'
         os.makedirs(output_dir, exist_ok=True)
-        output_file = f'vllm_bench_{args.model}_gpu{args.gpu}_tp{args.tp}_converted.csv'
+        base = os.path.splitext(os.path.basename(args.input))[0]
+        output_file = f'{base}_gpu{args.gpu}_tp{args.tp}_converted.csv'
         args.output = os.path.join(output_dir, output_file)
 
     # Add file existence check

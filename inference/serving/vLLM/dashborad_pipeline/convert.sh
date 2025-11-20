@@ -1,15 +1,15 @@
 #!/bin/bash
 # convert.sh vLLM benchmark 转换脚本
 if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <model_name> <model_alias>"
+    echo "Usage: $0 <input_csv_path> <model_alias>"
     exit 1
 fi
 
-MODEL_NAME="$1"
+INPUT_CSV="$1"
 MODEL_ALIAS="$2"
 
 python3 convert_vLLM_bench.py \
-    --model "$MODEL_NAME" \
+    --input "$INPUT_CSV" \
     --model-alias "$MODEL_ALIAS" \
     --tp 4 \
     --dp 1 \

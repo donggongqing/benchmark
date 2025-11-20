@@ -25,11 +25,9 @@ DATA_TIME=$(date +%Y%m%d_%H%M%S)
 MODEL_NAME=$(basename "${MODEL_PATH%/}" | tr '[:upper:]' '[:lower:]')
 OUTPUT_FILE="vllm_bench_${MODEL_NAME}_${DATA_TIME}_results.csv"
 BASE_DIR="output_result"
-RESULT_DIR="vllm_results"
 
 # Ensure output directories exist
 mkdir -p "$BASE_DIR"
-mkdir -p "$RESULT_DIR"
 
 FULL_OUTPUT_PATH="$BASE_DIR/$OUTPUT_FILE"
 echo "" > "$FULL_OUTPUT_PATH"  # Clear file if exists
@@ -67,7 +65,6 @@ for PAIR in "${IO_PAIRS[@]}"; do
             --save-result \
             --percentile-metrics 'ttft,tpot,itl,e2el' \
             --metric-percentiles "95,99" \
-            --result-dir "$RESULT_DIR" \
             --max-concurrency "$C" \
             2>&1 | awk '/============ Serving Benchmark Result ============/{flag=1; next} /==================================================/{flag=0} flag')
 
