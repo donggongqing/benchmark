@@ -49,7 +49,7 @@ vi convert.sh
 ```
 ### 执行convert.sh
 ```
-bash convert.sh  模型名称（served-model-name）  模型别名
+bash convert.sh  模型测试结果文件csv路径  模型别名
 ```
 example:
 ```bash
