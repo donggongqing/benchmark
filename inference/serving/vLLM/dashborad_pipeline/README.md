@@ -53,7 +53,7 @@ bash convert.sh  模型测试结果文件csv路径  模型别名
 ```
 example:
 ```bash
-bash convert.sh  deepseek-r1-distill-qwen-1.5b  DeepSeek-R1-Distill-Qwen-1.5B
+bash convert.sh  output_result/vllm_bench_deepseek-r1-0528_results.csv  DeepSeek-R1-Distill-Qwen-1.5B
 ```
 如报错按提示安装缺少的依赖
 ```
