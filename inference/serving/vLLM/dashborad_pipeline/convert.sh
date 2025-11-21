@@ -15,15 +15,15 @@ python3 convert_vLLM_bench.py \
     --dp 1 \
     --pp 1 \
     --ep 1 \
-    --data-type fp16 \
-    --gpu "H20" \
+    --data-type bf16 \
+    --gpu "S5000" \
     --gpu-num 4 \
-    --driver "NVIDIA-Linux-x86" \
-    --driver-version "570.124.06" \
-    --backend cuda \
-    --backend-version 12.8 \
-    --engine cuda \
-    --engine-version 12.8 \
+    --driver "msua_driver" \
+    --driver-version "3.3.1-server" \
+    --backend musa \
+    --backend-version 4.3.1 \
+    --engine musa \
+    --engine-version 4.3.1 \
     --serving vllm \
-    --serving-version 0.9.0 \
+    --serving-version 0.9.3 \
     --source "vllm"

@@ -16,13 +16,13 @@ TARGET_COLS = [
     "engine","engineVersion","serving","servingVersion","timestamp","source"
 ]
 
-def safe_div(a, b):
-    try:
-        if b is None or (isinstance(b, (int, float)) and b == 0):
-            return float("nan")
-        return a / b
-    except Exception:
-        return float("nan")
+# def safe_div(a, b):
+#     try:
+#         if b is None or (isinstance(b, (int, float)) and b == 0):
+#             return float("nan")
+#         return a / b
+#     except Exception:
+#         return float("nan")
 
 def transform_row(row, args):
 
@@ -45,11 +45,12 @@ def transform_row(row, args):
     max_conc = row.get("max_concurrency", None)
 
     # Check the numerical calculations in the transform_row function
-    out["mean_input_tokens"] = safe_div(total_in, succ) if (pd.notna(total_in) 
-        and pd.notna(succ) and succ > 0) else float("nan")
-    out["mean_output_tokens"] = safe_div(total_out, succ) if pd.notna(total_out) and pd.notna(succ) else float("nan")
+    # out["mean_input_tokens"] = safe_div(total_in, succ) if (pd.notna(total_in) and pd.notna(succ) and succ > 0) else float("nan")
+    # out["mean_output_tokens"] = safe_div(total_out, succ) if pd.notna(total_out) and pd.notna(succ) else float("nan")
 
     # Direct mapping of concurrent requests
+    out["mean_input_tokens"] = row.get("input_len", None)
+    out["mean_output_tokens"] = row.get("output_len", None)
     out["batch"] = int(max_conc) if pd.notna(max_conc) else ""
     out["num_concurrent_requests"] = int(max_conc) if pd.notna(max_conc) else ""
 
