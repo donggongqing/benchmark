@@ -19,11 +19,12 @@ CONCURRENCY_AND_PROMPTS=(
     "64 128"
     "128 256"
 )
-
+TP_NUM=8
+PP_NUM=1
 DATASET_NAME="random"
 DATA_TIME=$(date +%Y%m%d_%H%M%S)
 MODEL_NAME=$(basename "${MODEL_PATH%/}" | tr '[:upper:]' '[:lower:]')
-OUTPUT_FILE="vllm_bench_${MODEL_NAME}_${DATA_TIME}_results.csv"
+OUTPUT_FILE="vllm_bench_${MODEL_NAME}_${TP_NUM}${PP_NUM}_${DATA_TIME}_results.csv"
 BASE_DIR="output_result"
 
 # Ensure output directories exist
