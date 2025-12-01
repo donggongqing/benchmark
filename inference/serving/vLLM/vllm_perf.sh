@@ -2,7 +2,8 @@
 set -euo pipefail
 
 MODEL_PATH="/data/model/deepseek-r1-distill-llama-70b/"
-
+TP_NUM=8
+PP_NUM=1
 # Input/output length pairs
 IO_PAIRS=(
     "4096 1024"
@@ -19,12 +20,11 @@ CONCURRENCY_AND_PROMPTS=(
     "64 128"
     "128 256"
 )
-TP_NUM=8
-PP_NUM=1
+
 DATASET_NAME="random"
 DATA_TIME=$(date +%Y%m%d_%H%M%S)
 MODEL_NAME=$(basename "${MODEL_PATH%/}" | tr '[:upper:]' '[:lower:]')
-OUTPUT_FILE="vllm_bench_${MODEL_NAME}_${TP_NUM}${PP_NUM}_${DATA_TIME}_results.csv"
+OUTPUT_FILE="vllm_bench_${MODEL_NAME}_tp${TP_NUM}pp${PP_NUM}_${DATA_TIME}_results.csv"
 BASE_DIR="output_result"
 
 # Ensure output directories exist

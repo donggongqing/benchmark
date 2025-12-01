@@ -44,9 +44,7 @@ def transform_row(row, args):
     total_out = row.get("Total_generated_tokens", None)
     max_conc = row.get("max_concurrency", None)
 
-    # Check the numerical calculations in the transform_row function
-    # out["mean_input_tokens"] = safe_div(total_in, succ) if (pd.notna(total_in) and pd.notna(succ) and succ > 0) else float("nan")
-    # out["mean_output_tokens"] = safe_div(total_out, succ) if pd.notna(total_out) and pd.notna(succ) else float("nan")
+
 
     # Direct mapping of concurrent requests
     out["mean_input_tokens"] = row.get("input_len", None)
