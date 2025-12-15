@@ -1,6 +1,6 @@
 # benchmark
 服务与离线基准测试套件
-## LLM 基准结构（vLLM 与 SGLang）
+## LLM 基准测试结构（vLLM 与 SGLang）
 
 ## vLLM 服务与基准测试
 
