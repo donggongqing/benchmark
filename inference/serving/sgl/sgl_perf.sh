@@ -7,15 +7,28 @@ TP_NUM=${TP_NUM:-8}
 
 # Input/output length pairs for the random dataset
 IO_PAIRS=(
+    "256 256"
+    "512 512"
     "1024 1024"
+    "2048 1024"
+    "3072 1024"
+    "4096 1024"
 )
 
 # Concurrency and num-prompts pairs (1-to-1 mapping)
 CONCURRENCY_AND_PROMPTS=(
-    "16 100"
+    "1 2"
+    "2 4"
+    "4 8"
+    "8 16"
+    "16 32"
+    "32 64"
+    "64 128"
+    "128 256"
+    "256 512"
 )
 
-DATASET_NAME="random"
+DATASET_NAME=${DATASET_NAME:-"random-ids"}
 WARMUP_REQUESTS=10
 BACKEND="sglang"
 BASE_DIR="output_result"
