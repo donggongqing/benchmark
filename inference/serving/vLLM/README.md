@@ -79,7 +79,7 @@ IO_PAIRS=(
     "2048 1024"
 )
 
-# Concurrency and num-prompts (1-to-1 mapping)
+# Concurrency and num-prompts (1-to-2 mapping)
 CONCURRENCY_AND_PROMPTS=(
     "1 2"
     "2 4"
