@@ -77,7 +77,7 @@ for PAIR in "${IO_PAIRS[@]}"; do
             /Total generated tokens/ {tg=clean($NF)}
             /Request throughput/ {rt=clean($NF)}
             /Output token throughput/ {ot=clean($NF)}
-            /Total Token throughput/ {tt=clean($NF)}
+            /Total Token throughput/i {tt=clean($NF)}
             /Mean TTFT/ {mttft=clean($NF)}
             /Median TTFT/ {medttft=clean($NF)}
             /P95 TTFT/ {p95ttft=clean($NF)}
