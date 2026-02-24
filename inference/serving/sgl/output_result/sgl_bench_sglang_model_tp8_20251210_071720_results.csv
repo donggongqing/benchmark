@@ -1,0 +1,2 @@
+input_len,output_len,max_concurrency,num_prompts,Successful_requests,Benchmark_duration_s,Total_input_tokens,Total_generated_tokens,Request_throughput_req_s,Output_token_throughput_tok_s,Total_Token_throughput_tok_s,Mean_TTFT_ms,Median_TTFT_ms,P95_TTFT_ms,P99_TTFT_ms,Mean_TPOT_ms,Median_TPOT_ms,P95_TPOT_ms,P99_TPOT_ms,Mean_ITL_ms,Median_ITL_ms,P95_ITL_ms,P99_ITL_ms,Mean_E2EL_ms,Median_E2EL_ms,P95_E2EL_ms,P99_E2EL_ms
+1024,1024,16,100,100,64.97,50561,52135,1.54,802.47,1580.72,196.80,147.76,,524.06,,,,,17.99,14.84,17.53,92.71,9556.85,9635.96,,
