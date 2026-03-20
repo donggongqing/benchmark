@@ -1,11 +1,17 @@
 #!/bin/bash
 set -euo pipefail
 
-MODEL_PATH="/data/model/deepseek-r1-distill-llama-70b/"
+MODEL_PATH="/data/models/Qwen2.5-VL-72B-Instruct"
 TP_NUM=8
 PP_NUM=1
-# Input/output length pairs
+
+# Input/output length pairs (现在你可以随便往里加不同长度了)
 IO_PAIRS=(
+    "256 256"
+    "512 512"
+    "1024 1024"
+    "2048 1024"
+    "3072 1024"
     "4096 1024"
 )
 
@@ -46,11 +52,29 @@ echo "📊 Benchmark started for model: $MODEL_NAME"
 echo "📂 Saving CSV results to: $FULL_OUTPUT_PATH"
 echo
 
-# Loop through IO_PAIRS
+# 1. 开启最外层循环：遍历每一个 Input/Output 组合
 for PAIR in "${IO_PAIRS[@]}"; do
     read W O <<< "$PAIR"
+    
+    echo "======================================================"
+    echo "🔥 Starting Warmup for input_len=$W, output_len=$O..."
+    echo "   (Latency from this step is NOT included in the final results)"
+    
+    # 2. 动态 Warm-up：每次切换长度，先用当前的 $W 和 $O 热个身
+    vllm bench serve \
+        --model "$MODEL_PATH" \
+        --served-model-name "$MODEL_NAME" \
+        --dataset-name "$DATASET_NAME" \
+        --random-input-len "$W" \
+        --random-output-len "$O" \
+        --num-prompts 2 \
+        --max-concurrency 1 \
+        > /dev/null 2>&1
+        
+    echo "✅ Warmup complete for $W/$O. The underlying engine is ready!"
+    echo "------------------------------------------------------"
 
-    # Loop through concurrency and corresponding num-prompts
+    # 3. 开启内层循环：针对当前热身好的长度，遍历所有并发
     for CP in "${CONCURRENCY_AND_PROMPTS[@]}"; do
         read C N <<< "$CP"
         echo "===== Running benchmark: input_len=$W, output_len=$O, max_concurrency=$C, num_prompts=$N ====="
