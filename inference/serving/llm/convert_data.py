@@ -1,10 +1,26 @@
-import os
-import json
+import re
 import pandas as pd
 import argparse
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-import glob
+from typing import List, Optional
+
+# Rename raw vllm_bench column names to the llmperf-style names
+# the frontend columnMapping already expects (no value changes)
+VLLM_BENCH_RENAME = {
+    'input_len':                     'mean_input_tokens',
+    'output_len':                    'mean_output_tokens',
+    'max_concurrency':               'num_concurrent_requests',
+    'num_prompts':                   'results_num_requests_started',
+    'Successful_requests':           'results_num_completed_requests',
+    'Mean_TTFT_ms':                  'results_ttft_s_mean',
+    'Mean_TPOT_ms':                  'results_tpot_s_mean',
+    'Mean_ITL_ms':                   'results_inter_token_latency_s_mean',
+    'Mean_E2EL_ms':                  'results_end_to_end_latency_s_mean',
+    'Output_token_throughput_tok_s': 'results_mean_output_throughput_token_per_s',
+    'Total_Token_throughput_tok_s':  'results_request_output_throughput_token_per_s_mean',
+    'Request_throughput_req_s':      'results_num_completed_requests_per_min',
+}
 
 class DataConverter:
     def __init__(
@@ -58,19 +74,16 @@ class DataConverter:
         self.output_dir = current_dir / "convert_data" / f"{model}_data"
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def find_result_directories(self) -> List[Path]:
-        """Find all directories containing results for the specified model"""
-        model_result_dir = self.base_dir / f"{self.model}_result"
-        if not model_result_dir.exists():
-            raise FileNotFoundError(f"No results directory found for model {self.model}")
-        
-        # Find all subdirectories that match the pattern
-        result_dirs = []
-        for dir_path in model_result_dir.glob(f"{self.model}_inp*_out*_conc*_*"):
-            if dir_path.is_dir():
-                result_dirs.append(dir_path)
-        
-        return result_dirs
+    def find_result_files(self) -> List[Path]:
+        """Find all CSV result files for the specified model"""
+        pattern = f"vllm_bench_{self.model}_*.csv"
+        result_files = list(self.base_dir.glob(pattern))
+        if not result_files:
+            raise FileNotFoundError(
+                f"No results files found for model {self.model} in {self.base_dir} "
+                f"(pattern: {pattern})"
+            )
+        return result_files
 
     def process_summary_file(self, summary_file: Path) -> Optional[pd.DataFrame]:
         """Process a single summary JSON file"""
@@ -110,49 +123,38 @@ class DataConverter:
             return None
 
     def convert_all(self):
-        """Convert all JSON files to CSV"""
-        summary_dfs = []
-        individual_dfs = []
-        
-        result_dirs = self.find_result_directories()
-        print(f"Found {len(result_dirs)} result directories for model {self.model}")
-        
-        for result_dir in result_dirs:
-            # Find summary and individual files
-            summary_files = list(result_dir.glob(f"{self.model}_*_summary.json"))
-            individual_files = list(result_dir.glob(f"{self.model}_*_individual_responses.json"))
-            
-            if not summary_files or not individual_files:
-                print(f"Missing files in directory {result_dir}")
-                continue
-                
-            # Process summary file
-            summary_df = self.process_summary_file(summary_files[0])
-            if summary_df is not None:
-                timestamp = summary_df['timestamp'].iloc[0]
-                summary_dfs.append(summary_df)
-                
-                # Process individual file with corresponding timestamp
-                individual_df = self.process_individual_file(individual_files[0], timestamp)
-                if individual_df is not None:
-                    individual_dfs.append(individual_df)
-        
-        # Combine and save all results
-        if summary_dfs:
-            combined_summary = pd.concat(summary_dfs, ignore_index=True)
-            combined_summary.to_csv(
-                self.output_dir / f"results_{self.model}_summary.csv",
-                index=False
-            )
-            print(f"Saved combined summary to results_{self.model}_summary.csv")
-        
-        if individual_dfs:
-            combined_individual = pd.concat(individual_dfs, ignore_index=True)
-            combined_individual.to_csv(
-                self.output_dir / f"results_{self.model}_individual_summary.csv",
-                index=False
-            )
-            print(f"Saved combined individual responses to results_{self.model}_individual_summary.csv")
+        """Append metadata columns to raw CSV files and combine them."""
+        result_files = self.find_result_files()
+        print(f"Found {len(result_files)} result files for model {self.model}")
+
+        dfs = []
+        for result_file in result_files:
+            df = pd.read_csv(result_file)
+
+            # Rename vllm_bench column names to llmperf-style names the frontend expects
+            df = df.rename(columns={k: v for k, v in VLLM_BENCH_RENAME.items() if k in df.columns})
+
+            # Extract timestamp from filename (pattern: _YYYYMMDD_HHMMSS_)
+            ts_match = re.search(r'_(\d{8})_(\d{6})_', result_file.name)
+            if ts_match:
+                d, t = ts_match.group(1), ts_match.group(2)
+                df['timestamp'] = f"{d[:4]}-{d[4:6]}-{d[6:8]}T{t[:2]}:{t[2:4]}:{t[4:6]}"
+            else:
+                df['timestamp'] = datetime.now().isoformat()
+
+            for key, value in self.extra_info.items():
+                df[key] = value
+
+            dfs.append(df)
+            print(f"Processed {result_file.name}")
+
+        if dfs:
+            combined = pd.concat(dfs, ignore_index=True)
+            out_file = self.output_dir / f"results_{self.model}_summary.csv"
+            combined.to_csv(out_file, index=False)
+            print(f"Saved combined results to {out_file}")
+        else:
+            print("No data to save.")
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert benchmark results to CSV format')
