@@ -1,0 +1,15 @@
+﻿name: "golden_benchmark_matrix"
+sets:
+  - name: "Short_IO"
+    io_pairs:
+      - [64, 64]
+    concurrency_and_prompts:
+      - [16, 64]
+      - [128, 512]
+  - name: "Decode_Only"
+    io_pairs:
+      - [1, 2048]
+      - [1, 4096]
+    concurrency_and_prompts:
+      - [1, 2]
+      - [16, 32]

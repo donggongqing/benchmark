@@ -1,0 +1,3 @@
+sglang
+pyyaml
+# torch is intentionally omitted to support custom accelerator builds (MUSA, ROCm, CANN)

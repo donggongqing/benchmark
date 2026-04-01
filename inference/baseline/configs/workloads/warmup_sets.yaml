@@ -1,0 +1,21 @@
+﻿name: "warmup_benchmark_matrix"
+sets:
+  - name: "Warmup_Light_IO"
+    io_pairs:
+      - [32, 32]
+      - [256, 256]
+    concurrency_and_prompts:
+      - [1, 2]
+      - [4, 8]
+  - name: "Warmup_Decode_Only"
+    io_pairs:
+      - [1, 512]
+    concurrency_and_prompts:
+      - [1, 2]
+      - [2, 4]
+  - name: "Warmup_Prefill_Only"
+    io_pairs:
+      - [1024, 1]
+    concurrency_and_prompts:
+      - [1, 2]
+      - [4, 8]
