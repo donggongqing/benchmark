@@ -5,11 +5,13 @@ import signal
 from .engine import BaseEngine
 
 class SGLangEngine(BaseEngine):
-    def __init__(self, model_path: str, tp_size: int, extra_args: list = None):
+    def __init__(self, model_path: str, tp_size: int, extra_args: list = None, log_dir=None):
         super().__init__(model_path, tp_size)
         self.extra_args = extra_args or []
         self.process = None
         self.server_cmd = ""
+        self.log_dir = log_dir
+        self._log_file = None
 
     def start_server(self):
         print(f"🚀 Starting SGLang server for {self.model_path} with TP={self.tp_size}")
@@ -20,14 +22,19 @@ class SGLangEngine(BaseEngine):
             "--tp", str(self.tp_size)
         ] + self.extra_args
 
-        # We redirect stdout to devnull to avoid cluttering the terminal,
-        # but stderr is captured to check for immediate failures.
         self.server_cmd = " ".join(cmd)
-        self.process = subprocess.Popen(
-            cmd,
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.PIPE
-        )
+
+        # Redirect server output to log file to keep terminal clean
+        popen_kwargs = {}
+        if self.log_dir:
+            os.makedirs(self.log_dir, exist_ok=True)
+            log_path = os.path.join(self.log_dir, "sglang_server.log")
+            self._log_file = open(log_path, "a")
+            popen_kwargs["stdout"] = self._log_file
+            popen_kwargs["stderr"] = self._log_file
+            print(f"📄 Server logs redirected to: {log_path}")
+
+        self.process = subprocess.Popen(cmd, **popen_kwargs)
         
         # Naive wait - in a prod env, you'd poll an HTTP endpoint like /health
         print("⏳ Waiting for SGLang server to initialize (approx 30s)...")
@@ -49,6 +56,9 @@ class SGLangEngine(BaseEngine):
             self.process.wait()
             self.process = None
             self.server_cmd = ""
+            if self._log_file:
+                self._log_file.close()
+                self._log_file = None
             print("🛑 SGLang server stopped.")
         else:
             print("⚠️ SGLang server was already stopped or not started.")

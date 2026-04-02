@@ -1,0 +1,116 @@
+# Workload YAML Template
+#
+# Copy and fill in the placeholders (<...>) to create a new benchmark config.
+# Place the file in: inference/baseline/configs/workloads/
+#
+# Usage:
+#   python run_eval.py --workload configs/workloads/<this_file>.yaml
+#
+# CLI args --model, --tp, --host, --port override server_config values at runtime.
+
+name: "<model_name>_benchmark"
+
+server_config:
+  model_path: "<model_path>"          # e.g., /data/models/Qwen3.5-9B/
+  tp: <tp_size>                       # e.g., 8 (tensor parallelism degree)
+  host: "0.0.0.0"
+  port: 30000
+  extra_args: "<serve_flags>"         # e.g., --trust-remote-code --mem-fraction-static 0.8
+
+# =============================================================================
+# Test Sets
+# =============================================================================
+# Each set defines a group of tests with:
+#   - io_pairs: [[input_tokens, output_tokens], ...]
+#   - concurrency_and_prompts: [[concurrency, num_prompts], ...]
+#     OR
+#   - request_rate_and_prompts: [[qps, num_prompts], ...]
+#
+# Concurrency mode: Fixed max concurrent requests (saturation testing)
+# Request rate mode: Fixed QPS arrival rate (latency profiling)
+# =============================================================================
+
+sets:
+  # --- Short I/O stress test ---
+  - name: Short
+    io_pairs:
+      - [64, 64]
+    concurrency_and_prompts:
+      - [16, 64]
+      - [128, 512]
+      - [256, 1024]
+
+  # --- Normal generation (increasing context) ---
+  - name: Normal_Light
+    io_pairs:
+      - [256, 256]
+      - [512, 512]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]
+
+  - name: Normal_Medium
+    io_pairs:
+      - [1024, 1024]
+      - [2048, 1024]
+      - [4096, 1024]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]
+
+  - name: Normal_Large
+    io_pairs:
+      - [8192, 1024]
+      - [16384, 1024]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [8, 32]
+      - [16, 64]
+      - [64, 256]
+
+  # --- Prefill-Only (output=1, isolates TTFT) ---
+  - name: Prefill_Light
+    io_pairs:
+      - [256, 1]
+      - [512, 1]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]
+
+  - name: Prefill_Medium
+    io_pairs:
+      - [1024, 1]
+      - [2048, 1]
+      - [4096, 1]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]
+
+  # --- Decode-Only (input=1, isolates TPOT) ---
+  - name: Decode_Light
+    io_pairs:
+      - [1, 256]
+      - [1, 512]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]
+
+  - name: Decode_Medium
+    io_pairs:
+      - [1, 1024]
+      - [1, 2048]
+    concurrency_and_prompts:
+      - [1, 4]
+      - [16, 64]
+      - [64, 256]
+      - [128, 512]

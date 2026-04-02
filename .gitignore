@@ -28,3 +28,4 @@
 **/graphics/results/*
 
 **/baseline/results/*
+**/baseline*__pycache__
