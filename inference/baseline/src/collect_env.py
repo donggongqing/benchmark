@@ -46,11 +46,39 @@ def get_framework_version(framework_name):
         pass
     return "Not Installed"
 
+def get_cpu_info():
+    try:
+        output = subprocess.check_output("cat /proc/cpuinfo | grep 'model name' | head -n 1", shell=True, universal_newlines=True)
+        if ":" in output:
+            return output.split(":")[1].strip()
+    except Exception:
+        pass
+    return platform.machine()
+
+def get_backend_info():
+    try:
+        if shutil.which("nvcc"):
+            out = subprocess.check_output(["nvcc", "--version"], universal_newlines=True)
+            for line in out.split('\n'):
+                if "release" in line.lower():
+                    # Usually looks like: Cuda compilation tools, release 12.1, V12.1.105
+                    return "CUDA " + line.split("release")[1].strip().split(",")[0]
+        if shutil.which("mcc"):
+            out = subprocess.check_output(["mcc", "--version"], universal_newlines=True)
+            return "MUSA " + out.split('\n')[0].strip()
+        if shutil.which("hipcc"):
+            out = subprocess.check_output(["hipcc", "--version"], universal_newlines=True)
+            return "ROCm " + out.split('\n')[0].strip()
+    except Exception:
+        pass
+    return "Unknown Backend"
+
 def collect_environment():
     info = {
         "os": platform.system(),
         "os_release": platform.release(),
         "architecture": platform.machine(),
+        "cpu_model": get_cpu_info(),
         "hardware": {},
         "software": {}
     }
@@ -65,6 +93,7 @@ def collect_environment():
 
     # 2. Software Details
     info["software"]["sglang"] = get_framework_version("sglang")
+    info["software"]["backend"] = get_backend_info()
     info["software"]["vllm"] = get_framework_version("vllm")
     
     return info

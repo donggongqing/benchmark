@@ -1,15 +1,123 @@
-﻿name: "golden_benchmark_matrix"
+name: golden_benchmark_matrix
+server_config: {model_path: /data/models/Qwen3.5-9B/, tp: 8, host: 0.0.0.0, port: 30001,
+  extra_args: --trust-remote-code --disable-radix-cache --reasoning-parser qwen3 --tool-call-parser
+    qwen3_coder --enable-flashinfer-allreduce-fusion --mem-fraction-static 0.8}
 sets:
-  - name: "Short_IO"
-    io_pairs:
-      - [64, 64]
-    concurrency_and_prompts:
-      - [16, 64]
-      - [128, 512]
-  - name: "Decode_Only"
-    io_pairs:
-      - [1, 2048]
-      - [1, 4096]
-    concurrency_and_prompts:
-      - [1, 2]
-      - [16, 32]
+- name: Short
+  io_pairs:
+  - [64, 64]
+  concurrency_and_prompts:
+  - [16, 64]
+  - [128, 512]
+  - [256, 1024]
+  - [512, 2048]
+- name: Normal_Light
+  io_pairs:
+  - [256, 256]
+  - [512, 512]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]
+  - [256, 1024]
+- name: Normal_Medium
+  io_pairs:
+  - [1024, 1024]
+  - [2048, 1024]
+  - [4096, 1024]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]
+- name: Normal_Large
+  io_pairs:
+  - [8192, 1024]
+  - [16384, 1024]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [8, 32]
+  - [16, 64]
+  - [64, 256]
+- name: Normal_Extra_Large
+  io_pairs:
+  - [32768, 1024]
+  - [65536, 1024]
+  - [8192, 4096]
+  - [16384, 4096]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [32, 128]
+- name: Normal_Massive
+  io_pairs:
+  - [131072, 1024]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [4, 16]
+  - [8, 32]
+- name: Prefill_Light
+  io_pairs:
+  - [256, 1]
+  - [512, 1]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]
+  - [256, 1024]
+- name: Prefill_Medium
+  io_pairs:
+  - [1024, 1]
+  - [2048, 1]
+  - [4096, 1]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]
+- name: Prefill_Large
+  io_pairs:
+  - [8192, 1]
+  - [16384, 1]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [8, 32]
+  - [16, 64]
+  - [64, 256]
+- name: Prefill_Extra_Large
+  io_pairs:
+  - [32768, 1]
+  - [65536, 1]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [32, 128]
+- name: Prefill_Massive
+  io_pairs:
+  - [131072, 1]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [4, 16]
+  - [8, 32]
+- name: Decode_Light
+  io_pairs:
+  - [1, 256]
+  - [1, 512]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]
+  - [256, 1024]
+- name: Decode_Medium
+  io_pairs:
+  - [1, 1024]
+  - [1, 2048]
+  - [1, 4096]
+  concurrency_and_prompts:
+  - [1, 4]
+  - [16, 64]
+  - [64, 256]
+  - [128, 512]

@@ -1,0 +1,28 @@
+name: "warmup_qps_benchmark_matrix"
+
+server_config:
+  model_path: "/data/models/Qwen3.5-9B/"
+  tp: 1
+  host: "0.0.0.0"
+  port: 30001
+  extra_args: "--trust-remote-code --disable-radix-cache"
+
+sets:
+  - name: "Warmup_Light_IO_QPS"
+    io_pairs:
+      - [32, 32]
+      - [256, 256]
+    request_rate_and_prompts:
+      - [2.0, 10]
+      - [4.0, 20]
+  - name: "Warmup_Decode_Only_QPS"
+    io_pairs:
+      - [1, 512]
+    request_rate_and_prompts:
+      - [2.0, 10]
+      - [4.0, 20]
+  - name: "Warmup_Prefill_Only_QPS"
+    io_pairs:
+      - [1024, 1]
+    request_rate_and_prompts:
+      - [2.0, 1000]

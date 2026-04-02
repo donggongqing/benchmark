@@ -1,16 +1,19 @@
-﻿import os
+import os
+import socket
 import csv
 import json
 import argparse
+import yaml
 from datetime import datetime
 from pathlib import Path
 
 from src.collect_env import collect_environment
 from src.backend_sgl import SGLangEngine
 from src.orchestrator import run_workload_matrix
+from src.report_generator import generate_final_report
 
 CSV_HEADERS = [
-    "input_len", "output_len", "max_concurrency", "num_prompts", "Successful_requests",
+    "input_len", "output_len", "max_concurrency", "request_rate", "num_prompts", "Successful_requests",
     "Benchmark_duration_s", "Total_input_tokens", "Total_generated_tokens", "Request_throughput_req_s",
     "Output_token_throughput_tok_s", "Total_Token_throughput_tok_s", "Mean_TTFT_ms", "Median_TTFT_ms",
     "P95_TTFT_ms", "P99_TTFT_ms", "Mean_TPOT_ms", "Median_TPOT_ms", "P95_TPOT_ms", "P99_TPOT_ms",
@@ -20,15 +23,35 @@ CSV_HEADERS = [
 
 def main():
     parser = argparse.ArgumentParser(description="Baseline LLM Benchmark")
-    parser.add_argument("--model", type=str, required=True, help="Path to the model directory")
-    parser.add_argument("--tp", type=int, default=8, help="Tensor parallelism degree")
+    parser.add_argument("--model", type=str, default=None, help="Path to the model directory (overrides yaml)")
+    parser.add_argument("--tp", type=int, default=None, help="Tensor parallelism degree (overrides yaml)")
     parser.add_argument("--workload", type=str, required=True, help="Path to YAML workload config")
     
     # HYBRID MODE ARGS
     parser.add_argument("--host", type=str, default=None, help="Remote server host (enables remote mode)")
-    parser.add_argument("--port", type=int, default=30000, help="Remote server port (default 30000)")
+    parser.add_argument("--port", type=int, default=None, help="Remote server port (overrides yaml)")
     
-    args = parser.parse_args()
+    args, extra_args = parser.parse_known_args()
+
+    # Load YAML workload config
+    with open(args.workload, "r") as f:
+        workload_config = yaml.safe_load(f)
+    
+    server_config = workload_config.get("server_config", {})
+    
+    # Merge CLI and YAML (CLI takes precedence)
+    args.model = args.model or server_config.get("model_path")
+    if not args.model:
+        parser.error("--model must be provided either via CLI or workload yaml server_config.model_path")
+        
+    args.tp = args.tp if args.tp else server_config.get("tp", 8)
+    args.host = args.host or server_config.get("host")
+    args.port = args.port if args.port is not None else server_config.get("port", 30000)
+    
+    yaml_extra_args = server_config.get("extra_args", [])
+    if isinstance(yaml_extra_args, str):
+        yaml_extra_args = yaml_extra_args.split()
+    extra_args = yaml_extra_args + extra_args
 
     # 1. Create timestamped result directory
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -51,25 +74,49 @@ def main():
         writer.writerow(CSV_HEADERS)
 
         # 4. Hybrid Engine Setup
-        if args.host:
-            print(f"\n🌐 [HYBRID MODE] Separated: Evaluator running against Remote Server at {args.host}:{args.port}")
-            engine = None
-            target_host = args.host
-            target_port = args.port
+        target_host = args.host if args.host else "127.0.0.1"
+        target_port = args.port if args.port else 30000
+
+        def is_port_in_use(host, port):
+            check_host = "127.0.0.1" if host == "0.0.0.0" else host
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1.0)
+                return s.connect_ex((check_host, port)) == 0
+
+        engine = None
+        
+        # If user explicitly provided a host/port, we check if it's up.
+        # If it is up, we use it without starting a local server.
+        # If it is NOT up (or if they didn't provide one), we start the local server.
+        
+        is_running = is_port_in_use(target_host, target_port)
+        
+        if is_running:
+            print(f"\n🌐 [HYBRID MODE] Separated: Evaluator found running Server at {target_host}:{target_port}")
         else:
-            print("\n💻 [HYBRID MODE] Integrated: Evaluator will start/stop Local Server automatically.")
-            engine = SGLangEngine(model_path=args.model, tp_size=args.tp)
-            target_host = "127.0.0.1"
-            target_port = 30000 # Default SGLang port
+            print(f"\n💻 [HYBRID MODE] Integrated: No server found at {target_host}:{target_port}. Starting Local Server automatically.")
+            
+            host_args = []
+            if "--host" not in extra_args:
+                host_args.extend(["--host", target_host])
+            if "--port" not in extra_args:
+                host_args.extend(["--port", str(target_port)])
+                
+            engine = SGLangEngine(model_path=args.model, tp_size=args.tp, extra_args=extra_args + host_args)
         
         try:
             print("\n=======================================================")
             if engine:
                 engine.start_server()
 
+            def update_report():
+                csvfile.flush()
+                os.fsync(csvfile.fileno())
+                generate_final_report(result_dir, csv_path, env_info, args, engine)
+
             # 5. Run the Matrix
             if os.path.exists(args.workload):
-                run_workload_matrix(engine, writer, args.workload, target_host, target_port)
+                run_workload_matrix(engine, writer, args.workload, target_host, target_port, result_dir, on_step_complete=update_report)
             else:
                 print(f"⚠️ Error: Could not find '{args.workload}'.")
                 
@@ -77,7 +124,11 @@ def main():
             print("\n=======================================================")
             if engine:
                 engine.stop_server()
-            print(f"📊 Final CSV: {csv_path}")
+            print(f"📊 Intermediate Raw CSV: {csv_path}")
+
+    # 6. Generate final Excel-ready report
+    print("\nGenerating final comprehensive Excel-ready CSV report...")
+    generate_final_report(result_dir, csv_path, env_info, args, engine)
 
 if __name__ == "__main__":
     main()

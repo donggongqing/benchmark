@@ -9,6 +9,7 @@ class SGLangEngine(BaseEngine):
         super().__init__(model_path, tp_size)
         self.extra_args = extra_args or []
         self.process = None
+        self.server_cmd = ""
 
     def start_server(self):
         print(f"🚀 Starting SGLang server for {self.model_path} with TP={self.tp_size}")
@@ -21,6 +22,7 @@ class SGLangEngine(BaseEngine):
 
         # We redirect stdout to devnull to avoid cluttering the terminal,
         # but stderr is captured to check for immediate failures.
+        self.server_cmd = " ".join(cmd)
         self.process = subprocess.Popen(
             cmd,
             # stdout=subprocess.DEVNULL,
@@ -46,6 +48,7 @@ class SGLangEngine(BaseEngine):
                 os.kill(self.process.pid, signal.SIGKILL)
             self.process.wait()
             self.process = None
+            self.server_cmd = ""
             print("🛑 SGLang server stopped.")
         else:
             print("⚠️ SGLang server was already stopped or not started.")

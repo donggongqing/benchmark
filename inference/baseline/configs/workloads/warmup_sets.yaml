@@ -1,4 +1,12 @@
-﻿name: "warmup_benchmark_matrix"
+name: "warmup_benchmark_matrix"
+
+server_config:
+  model_path: "/data/models/Qwen3.5-9B/"
+  tp: 8
+  host: "0.0.0.0"
+  port: 30001
+  extra_args: "--trust-remote-code --disable-radix-cache --reasoning-parser qwen3 --tool-call-parser qwen3_coder --enable-flashinfer-allreduce-fusion --mem-fraction-static 0.8"
+
 sets:
   - name: "Warmup_Light_IO"
     io_pairs:
