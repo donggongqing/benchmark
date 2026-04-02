@@ -11,6 +11,7 @@ from src.collect_env import collect_environment
 from src.backend_sgl import SGLangEngine
 from src.orchestrator import run_workload_matrix
 from src.report_generator import generate_final_report
+from src.validator import validate_results
 
 CSV_HEADERS = [
     "input_len", "output_len", "max_concurrency", "request_rate", "num_prompts", "Successful_requests",
@@ -102,7 +103,9 @@ def main():
             if "--port" not in extra_args:
                 host_args.extend(["--port", str(target_port)])
                 
-            engine = SGLangEngine(model_path=args.model, tp_size=args.tp, extra_args=extra_args + host_args)
+            logs_dir = result_dir / "logs"
+            logs_dir.mkdir(parents=True, exist_ok=True)
+            engine = SGLangEngine(model_path=args.model, tp_size=args.tp, extra_args=extra_args + host_args, log_dir=str(logs_dir))
         
         try:
             print("\n=======================================================")
@@ -128,7 +131,38 @@ def main():
 
     # 6. Generate final Excel-ready report
     print("\nGenerating final comprehensive Excel-ready CSV report...")
-    generate_final_report(result_dir, csv_path, env_info, args, engine)
+    final_csv = generate_final_report(result_dir, csv_path, env_info, args, engine)
+
+    # 7. Validate results against theoretical hardware bounds
+    hw_info = env_info.get("hardware", {})
+    vendor_details = hw_info.get("details", {})
+    gpus = vendor_details.get("gpus", [])
+    gpu_name = gpus[0].split(",")[0].strip() if gpus and gpus[0] else ""
+
+    if final_csv and gpu_name:
+        print("\n🔎 Validating results against theoretical hardware bounds...")
+        report, report_path = validate_results(
+            csv_path=str(final_csv),
+            model_path=args.model,
+            gpu_name=gpu_name,
+            tp=args.tp,
+            output_dir=str(result_dir),
+        )
+
+        total_warnings = len(report.get("row_warnings", [])) + len(report.get("trend_warnings", []))
+        if total_warnings > 0:
+            print(f"\n⚠️  Validation found {total_warnings} warning(s):")
+            for w in report.get("row_warnings", []):
+                row_tag = f"[Row {w['row_index']}] " if w.get("row_index") else ""
+                print(f"   {row_tag}{w['severity'].upper()}: {w['message']}")
+            for w in report.get("trend_warnings", []):
+                print(f"   TREND {w['severity'].upper()}: {w['message']}")
+            print(f"   Full report: {report_path}")
+        else:
+            print("✅ Validation passed — no anomalies detected.")
+    else:
+        if not gpu_name:
+            print("\n⚠️  Skipping validation: GPU name not detected in environment info.")
 
 if __name__ == "__main__":
     main()

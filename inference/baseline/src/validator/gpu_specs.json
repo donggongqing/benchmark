@@ -1,0 +1,160 @@
+{
+    "_comment": "GPU specifications for benchmark result validation. All values are per-GPU.",
+    "_fields": {
+        "vram_gb": "Total GPU memory in GB",
+        "mem_bandwidth_tb_s": "Memory bandwidth in TB/s",
+        "bf16_tflops": "Peak BF16/FP16 tensor core throughput in TFLOPS",
+        "fp8_tflops": "Peak FP8 tensor core throughput in TFLOPS (0 if unsupported)",
+        "architecture": "GPU architecture name"
+    },
+
+    "NVIDIA H100 80GB HBM3": {
+        "vram_gb": 80,
+        "mem_bandwidth_tb_s": 3.35,
+        "bf16_tflops": 1979,
+        "fp8_tflops": 3958,
+        "architecture": "Hopper"
+    },
+    "NVIDIA H100 SXM5 80GB": {
+        "vram_gb": 80,
+        "mem_bandwidth_tb_s": 3.35,
+        "bf16_tflops": 1979,
+        "fp8_tflops": 3958,
+        "architecture": "Hopper"
+    },
+    "NVIDIA H100 NVL": {
+        "vram_gb": 94,
+        "mem_bandwidth_tb_s": 3.93,
+        "bf16_tflops": 1979,
+        "fp8_tflops": 3958,
+        "architecture": "Hopper"
+    },
+    "NVIDIA H200": {
+        "vram_gb": 141,
+        "mem_bandwidth_tb_s": 4.8,
+        "bf16_tflops": 1979,
+        "fp8_tflops": 3958,
+        "architecture": "Hopper"
+    },
+    "NVIDIA B200": {
+        "vram_gb": 192,
+        "mem_bandwidth_tb_s": 8.0,
+        "bf16_tflops": 4500,
+        "fp8_tflops": 9000,
+        "architecture": "Blackwell"
+    },
+    "NVIDIA B300": {
+        "vram_gb": 288,
+        "mem_bandwidth_tb_s": 8.0,
+        "bf16_tflops": 4500,
+        "fp8_tflops": 9000,
+        "architecture": "Blackwell"
+    },
+    "NVIDIA A100-SXM4-80GB": {
+        "vram_gb": 80,
+        "mem_bandwidth_tb_s": 2.0,
+        "bf16_tflops": 312,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA A100-SXM4-40GB": {
+        "vram_gb": 40,
+        "mem_bandwidth_tb_s": 1.56,
+        "bf16_tflops": 312,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA A100-PCIE-40GB": {
+        "vram_gb": 40,
+        "mem_bandwidth_tb_s": 1.56,
+        "bf16_tflops": 312,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA A100-PCIE-80GB": {
+        "vram_gb": 80,
+        "mem_bandwidth_tb_s": 2.0,
+        "bf16_tflops": 312,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA A800-SXM4-80GB": {
+        "vram_gb": 80,
+        "mem_bandwidth_tb_s": 2.0,
+        "bf16_tflops": 312,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA L40S": {
+        "vram_gb": 48,
+        "mem_bandwidth_tb_s": 0.864,
+        "bf16_tflops": 362,
+        "fp8_tflops": 733,
+        "architecture": "Ada Lovelace"
+    },
+    "NVIDIA L40": {
+        "vram_gb": 48,
+        "mem_bandwidth_tb_s": 0.864,
+        "bf16_tflops": 362,
+        "fp8_tflops": 0,
+        "architecture": "Ada Lovelace"
+    },
+    "NVIDIA L20": {
+        "vram_gb": 48,
+        "mem_bandwidth_tb_s": 0.864,
+        "bf16_tflops": 239,
+        "fp8_tflops": 479,
+        "architecture": "Ada Lovelace"
+    },
+    "NVIDIA GeForce RTX 4090": {
+        "vram_gb": 24,
+        "mem_bandwidth_tb_s": 1.01,
+        "bf16_tflops": 330,
+        "fp8_tflops": 661,
+        "architecture": "Ada Lovelace"
+    },
+    "NVIDIA GeForce RTX 3090": {
+        "vram_gb": 24,
+        "mem_bandwidth_tb_s": 0.936,
+        "bf16_tflops": 142,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+    "NVIDIA GeForce RTX 3060": {
+        "vram_gb": 12,
+        "mem_bandwidth_tb_s": 0.360,
+        "bf16_tflops": 51,
+        "fp8_tflops": 0,
+        "architecture": "Ampere"
+    },
+
+    "AMD Instinct MI300X": {
+        "vram_gb": 192,
+        "mem_bandwidth_tb_s": 5.3,
+        "bf16_tflops": 1307,
+        "fp8_tflops": 2614,
+        "architecture": "CDNA 3"
+    },
+    "AMD Instinct MI325X": {
+        "vram_gb": 256,
+        "mem_bandwidth_tb_s": 6.0,
+        "bf16_tflops": 1307,
+        "fp8_tflops": 2614,
+        "architecture": "CDNA 3"
+    },
+    "AMD Instinct MI355X": {
+        "vram_gb": 288,
+        "mem_bandwidth_tb_s": 8.0,
+        "bf16_tflops": 2300,
+        "fp8_tflops": 4600,
+        "architecture": "CDNA 4"
+    },
+
+    "MTT S4000": {
+        "vram_gb": 48,
+        "mem_bandwidth_tb_s": 1.2,
+        "bf16_tflops": 200,
+        "fp8_tflops": 0,
+        "architecture": "Moore Threads"
+    }
+}
